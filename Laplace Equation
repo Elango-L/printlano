@@ -1,0 +1,54 @@
+clc;
+
+% Geometry of Grid
+
+X=1;          % width of the grid
+Y=1;          % height of the grid
+Nx=71;        % number of grid points along X-axis of square grid
+Ny=71;        % number of grid points along Y-axis of square grid
+dx=X/(Nx-1);  % length of each sub-grid(element) along X-axis
+dy=Y/(Ny-1);  % length of each sub-grid(element) along Y-axis
+
+%Boundary and initial conditions
+
+T=25*ones(Nx,Ny);       % temperature array (in C)
+T_l=120;                % left side of grid(in C)
+T_b=60;                 % bottom side of grid(in C)
+T_r=40;                 % right side of grid(in C)
+T_t=90;                 % top side of grid(in C)
+
+T(1,2:Ny-1)=T_l;       %left side wall grid points temperature distribution (column:1 ,row: 2 to Ny-1) 
+T(2:Nx-1,Ny)=T_t;      %top side wall grid points temperature distribution (column:2 to Nx-1 ,row: Ny)
+T(Nx,2:Ny-1)=T_r;      %right side wall grid points temperature distribution (column:Nx ,row: 2 to Ny-1)
+T(2:Nx-1,1)=T_b;       %bottom side wall grid points temperature distribution (column:2 to Nx-1 ,row: 1)
+
+T(1,1)=(T_l + T_b)/2;  % left bottom corner temperature
+T(Nx,1)=(T_r + T_b)/2; % right bottom corner temperature
+T(1,Ny)=(T_l+T_t)/2;   % left top corner temperature
+T(Nx,Ny)=(T_r + T_t)/2; % right top corner temperature
+
+% computation Algorithm 
+eps=1e-5;
+err=5;
+it=0;
+while (err>eps)
+    it=it+1;
+    T_o=T;
+
+    for j=2:Ny-1 
+        for i=2:Nx-1
+            T(i,j)=(T(i+1,j) + T(i-1,j) + T(i,j+1) + T(i,j-1))/4 ;
+        end
+    end
+    err = sqrt(sumsqr(T-T_o)) ;
+end
+
+% Contour Plot ( Part- 3 )
+tr=T';
+x=0:dx:X;  % x-limits of the contour plot
+y=0:dy:Y;  % y-limits of the contour plot
+writematrix(T','Temperature_datapoints-tr.xlsx')
+colormap(jet);
+surf(x,y,T');       % 3D surface plot
+colorbar;           % colorbar of the temperature range
+title('2D Laplace equation - Temperature Distribution')
